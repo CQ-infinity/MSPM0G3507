@@ -1,0 +1,186 @@
+#include "motor_0.h"
+
+motor_t motor_l;
+motor_t motor_r;
+void motor_Init(void)
+{
+    DL_TimerG_startCounter(PWM_MOTOR_INST);  //pwm初始化
+    /*使能编码器输入捕获中断*/
+    NVIC_EnableIRQ(ENCODER1A_INST_INT_IRQN);
+    DL_TimerA_startCounter(ENCODER1A_INST);
+    NVIC_EnableIRQ(ENCODER2A_INST_INT_IRQN);
+    DL_TimerG_startCounter(ENCODER2A_INST);
+    /*使能时钟定时器中断*/
+    NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
+    DL_TimerA_startCounter(TIMER_0_INST);
+    /*motor_l init*/
+    motor_l.pwmDuty=0;
+    motor_l.speed=0;
+    motor_l.timer_index=DL_TIMER_CC_0_INDEX;
+    motor_l.forward_GPIO_PORT=GPIO_MOTOR_PORT;
+    motor_l.reverse_GPIO_PORT=GPIO_MOTOR_PORT;
+    motor_l.forward_GPIO_PIN=GPIO_MOTOR_AIN1_PIN;
+    motor_l.reverse_GPIO_PIN=GPIO_MOTOR_AIN2_PIN;
+    motor_l.speed_pid.kp=0;
+    motor_l.speed_pid.ki=0;
+    motor_l.speed_pid.kd=0;
+    motor_l.speed_pid.max_integral=1000;
+    motor_l.speed_pid.maxoutput=1000;
+    motor_l.speed_pid.dead_zone=0;
+    motor_l.pos_pid.kp=0;
+    motor_l.pos_pid.ki=0;
+    motor_l.pos_pid.kd=0;
+    motor_l.pos_pid.max_integral=1000;
+    motor_l.pos_pid.maxoutput=1000;
+    motor_l.pos_pid.dead_zone=0;
+    /*motor_r init*/
+    motor_r.pwmDuty=0;
+    motor_r.speed=0;
+    motor_r.timer_index=DL_TIMER_CC_1_INDEX;
+    motor_r.forward_GPIO_PORT=GPIO_MOTOR_PORT;
+    motor_r.reverse_GPIO_PORT=GPIO_MOTOR_PORT;
+    motor_r.forward_GPIO_PIN=GPIO_MOTOR_BIN1_PIN;
+    motor_r.reverse_GPIO_PIN=GPIO_MOTOR_BIN2_PIN;
+    motor_r.speed_pid.kp=0;
+    motor_r.speed_pid.ki=0;
+    motor_r.speed_pid.kd=0;
+    motor_r.speed_pid.max_integral=1000;
+    motor_r.speed_pid.maxoutput=1000;
+    motor_r.speed_pid.dead_zone=0;
+    motor_r.pos_pid.kp=0;
+    motor_r.pos_pid.ki=0;
+    motor_r.pos_pid.kd=0;
+    motor_r.pos_pid.max_integral=1000;
+    motor_r.pos_pid.maxoutput=1000;
+    motor_r.pos_pid.dead_zone=0;
+}
+
+/*左电机的编码器测速*/
+void TIMG6_IRQHandler(void)
+{
+    switch (DL_TimerA_getPendingInterrupt(ENCODER1A_INST))
+    {
+        case DL_TIMERA_IIDX_CC0_DN:
+            motor_l.encoder.dierct = DL_GPIO_readPins(GPIO_ENCODER_PORT, GPIO_ENCODER_ENCODER1B_PIN);//读取IO电平获取电机旋转方向
+            motor_l.encoder.countnum=
+            motor_l.encoder.dierct? (motor_l.encoder.countnum + 1) : (motor_l.encoder.countnum - 1);//通过判断旋转方向来决定countnum增加还是减少
+            break;
+        default:
+            break;
+    }
+}
+ 
+/*右电机的编码器测速*/
+void TIMG8_IRQHandler(void)
+{
+    switch (DL_TimerG_getPendingInterrupt(ENCODER2A_INST))
+    {
+        case DL_TIMERG_IIDX_CC0_DN:
+            motor_r.encoder.dierct= DL_GPIO_readPins(GPIO_ENCODER_PORT, GPIO_ENCODER_ENCODER2B_PIN);//读取IO电平获取电机旋转方向
+            motor_r.encoder.countnum =
+            motor_r.encoder.dierct ? ( motor_r.encoder.countnum + 1) : ( motor_r.encoder.countnum- 1);//通过判断旋转方向来决定countnum增加还是减少
+            break;
+        default:
+            break;  
+    }
+}
+ 
+/*period 100Hz*/
+// void TIMA1_IRQHandler(void)
+// {
+//     switch (DL_TimerA_getPendingInterrupt(CLOCK_INST))
+//     {
+//         case DL_TIMER_IIDX_ZERO:
+//             DL_TimerA_clearInterruptStatus(CLOCK_INST,DL_TIMER_IIDX_ZERO);
+//             motor_l.encoder.speed=(float)(motor_l.encoder.countnum-motor_l.encoder.lastcount)*6000/PULSE_PER_CYCLE;//rpm
+//             motor_r.encoder.speed=(float)(motor_r.encoder.countnum-motor_r.encoder.lastcount)*6000/PULSE_PER_CYCLE;//rpm
+//             motor_l.encoder.speed=Speed_Low_Filter(motor_l.encoder.speed,&motor_l.encoder);
+//             motor_r.encoder.speed=Speed_Low_Filter(motor_r.encoder.speed,&motor_r.encoder);
+//             motor_l.encoder.lastcount=motor_l.encoder.countnum;
+//             motor_r.encoder.lastcount=motor_r.encoder.countnum;
+//     }
+// }
+
+float Speed_Low_Filter(float new_Spe,encoder_t *encoder)
+{
+    float sum = 0.0f;
+    uint32_t test_Speed = new_Spe;
+    for(uint8_t i=SPEED_RECORD_NUM-1;i>0;i--)
+    {
+        encoder->speed_Record[i] = encoder->speed_Record[i-1];
+        sum += encoder->speed_Record[i-1];
+    }
+    encoder->speed_Record[0] = new_Spe;
+    sum += new_Spe;
+    test_Speed = sum/SPEED_RECORD_NUM;
+    return sum/SPEED_RECORD_NUM;
+}
+
+void Get_Speed(void)
+{
+    motor_l.encoder.speed=(float)(motor_l.encoder.countnum-motor_l.encoder.lastcount)*6000/PULSE_PER_CYCLE;//rpm
+    motor_r.encoder.speed=(float)(motor_r.encoder.countnum-motor_r.encoder.lastcount)*6000/PULSE_PER_CYCLE;//rpm
+    motor_l.encoder.speed=Speed_Low_Filter(motor_l.encoder.speed,&motor_l.encoder);
+    motor_r.encoder.speed=Speed_Low_Filter(motor_r.encoder.speed,&motor_r.encoder);
+    motor_l.encoder.lastcount=motor_l.encoder.countnum;
+    motor_r.encoder.lastcount=motor_r.encoder.countnum;
+}
+
+float PID_Realize(pid_t* pid,float target,float feedback)
+{
+    pid->err = target - feedback;
+    if(pid->err < pid->dead_zone && pid->err > -pid->dead_zone) pid->err = 0;//pid死区
+    pid->integral += pid->err;
+    
+    if(pid->ki * pid->integral < -pid->max_integral) pid->integral = -pid->max_integral / pid->ki;//积分限幅
+    else if(pid->ki * pid->integral > pid->max_integral) pid->integral = pid->max_integral / pid->ki;
+ 
+    pid->output = (pid->kp * pid->err) + (pid->ki * pid->integral) + (pid->kd * (pid->err - pid->last_err));
+ 
+    //输出限幅
+    if(pid->output > pid->maxoutput) pid->output = pid->maxoutput;
+    else  if(pid->output < -pid->maxoutput) pid->output = -pid->maxoutput;
+    pid->last_err = pid->err;
+ 
+    return pid->output;
+}
+
+void Motor_Set_Duty(motor_t *motor){
+    if (motor->pwmDuty>=0)//正转
+    {
+        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST,motor->pwmDuty,motor->timer_index);
+        DL_GPIO_setPins(motor->forward_GPIO_PORT, motor->forward_GPIO_PIN);
+        DL_GPIO_clearPins(motor->reverse_GPIO_PORT, motor->reverse_GPIO_PIN);
+    }
+    else if(motor->pwmDuty<0)//反转
+    {
+        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST,-motor->pwmDuty,motor->timer_index);
+        DL_GPIO_setPins(motor->reverse_GPIO_PORT, motor->reverse_GPIO_PIN);
+        DL_GPIO_clearPins(motor->forward_GPIO_PORT, motor->forward_GPIO_PIN);
+    }
+}
+
+void Motor_Set_Speed(motor_t *motor)
+{
+    motor->pwmDuty=PID_Realize(&motor->speed_pid,motor->speed,motor->encoder.speed);
+    Motor_Set_Duty(motor);
+}
+
+void Motor_Set_Position(motor_t *motor)
+{
+    motor->pos_pulse=(int)((motor->pos*PULSE_PER_CYCLE)/(LINE_SPEED_C));
+    motor->speed=PID_Realize(&motor->pos_pid, motor->pos_pulse, motor->encoder.countnum);
+    Motor_Set_Speed(motor);
+}
+
+void Motor_Stop(motor_t *motor)
+{
+    motor->speed=0;
+    Motor_Set_Speed(motor);
+    if(motor->encoder.speed==0)
+    {
+        motor->encoder.countnum=0;
+        motor->encoder.lastcount=0;
+        motor->speed_pid.integral=0;
+    }
+}

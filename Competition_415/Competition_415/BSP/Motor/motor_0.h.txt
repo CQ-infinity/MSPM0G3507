@@ -1,0 +1,57 @@
+#include "stdlib.h"
+#include "ti_msp_dl_config.h"
+
+#define MOTOR_SPEED_RERATIO 28    //电机减速比
+#define PULSE_PRE_ROUND 13       //每圈脉冲数
+#define ENCODER_MULTIPLE 1.0     //编码器倍频
+#define PULSE_PER_CYCLE  (MOTOR_SPEED_RERATIO * PULSE_PRE_ROUND * ENCODER_MULTIPLE)//每圈脉冲数
+#define RADIUS_OF_TYRE 3.3  //轮子直径 cm
+#define LINE_SPEED_C  RADIUS_OF_TYRE * 2 * 3.14  //轮子周长 cm
+#define SPEED_RECORD_NUM 20  //速度记录值，用于均值滤波
+
+typedef struct
+{
+    uint8_t dierct;     //方向
+    int32_t countnum;   //总计数值
+    int32_t lastcount;  //上一次计数值
+    float speed;        //电机速度
+    float speed_Record[SPEED_RECORD_NUM];  //记录电机近20次测速的结果
+} encoder_t;
+
+typedef struct
+{
+    float kp,ki,kd;     //pid参数
+    float err,last_err; //误差，上一次误差
+    float integral,max_integral; //积分值，积分限幅
+    float output,maxoutput; //输出，输出限幅
+    float dead_zone; //pid死区
+} pid_t;
+
+typedef struct
+{
+    uint8_t dir;          //方向
+    uint8_t timer_index;  //PWM定时器通道
+    int32_t pos_pulse;    //位置环目标脉冲
+    int32_t forward_GPIO_PIN; //前进GPIO引脚
+    int32_t reverse_GPIO_PIN;  //后退GPIO引脚
+    float pwmDuty; //PWM占空比
+    float speed;   //目标速度
+    float pos ;   //目标位置
+    encoder_t encoder; //编码器
+    pid_t pos_pid;    //速度环pid
+    pid_t speed_pid; //位置环pid
+    GPIO_Regs *forward_GPIO_PORT;  //前进GPIO端口
+    GPIO_Regs *reverse_GPIO_PORT;  // 后退GPIO端口
+} motor_t;
+
+
+void motor_Init(void);
+
+float Speed_Low_Filter(float new_Spe,encoder_t *encoder);
+void Get_Speed(void);
+float PID_Realize(pid_t* pid,float target,float feedback);
+
+void Motor_Set_Duty(motor_t *motor);
+void Motor_Set_Speed(motor_t *motor);
+void Motor_Set_Position(motor_t *motor);
+void Motor_Stop(motor_t *motor);
