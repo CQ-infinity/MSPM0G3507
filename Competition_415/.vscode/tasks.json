@@ -1,0 +1,53 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: tiarmclang.exe 生成活动文件",
+            "command": "C:/ti/ccs2050/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe",
+            "args": [
+                "-fcolor-diagnostics",
+                "-fansi-escape-codes",
+                "-g",
+                "-D__MSPM0G3507__",
+                "-D__USE_SYSCONFIG__",
+                "-march=thumbv6m",
+                "-mcpu=cortex-m0plus",
+                "-mthumb",
+                "-mlittle-endian",
+                "-mfloat-abi=soft",
+                "-I${workspaceFolder}",
+                "-I${workspaceFolder}/Debug",
+                "-I${workspaceFolder}/Debug/syscfg",
+                "-I${workspaceFolder}/BSP",
+                "-I${workspaceFolder}/BSP/Buzzer",
+                "-I${workspaceFolder}/BSP/Eight_Tracking",
+                "-I${workspaceFolder}/BSP/Key",
+                "-I${workspaceFolder}/BSP/LED",
+                "-I${workspaceFolder}/BSP/Motor",
+                "-I${workspaceFolder}/BSP/Questions",
+                "-I${workspaceFolder}/BSP/Servo",
+                "-I${workspaceFolder}/BSP/Task",
+                "-I${workspaceFolder}/BSP/TB6612",
+                "-I${workspaceFolder}/BSP/Timer",
+                "-IC:/ti/mspm0_sdk_2_10_00_04/source",
+                "-IC:/ti/mspm0_sdk_2_10_00_04/source/third_party/CMSIS/Core/Include",
+                "-c",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.o"
+            ],
+            "options": {
+                "cwd": "C:/ti/ccs2050/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "调试器生成的任务。"
+        }
+    ],
+    "version": "2.0.0"
+}
