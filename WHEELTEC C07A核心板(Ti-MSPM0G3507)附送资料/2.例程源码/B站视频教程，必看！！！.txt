@@ -1,0 +1,4 @@
+https://www.bilibili.com/video/BV1nLGtzFEEW
+
+！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+USER按键电路设计与BLS按键电路设计不同，不可将BLS按键的检测逻辑套用于USER按键上

@@ -1,0 +1,18 @@
+K210                      C07A
+5V   -------------    5V
+GND ------------ GND
+TX------------ 	PB7 (UART1_RX)
+RX------------ PB6 (UART1_TX)    
+UART1波特率 9600
+
+
+OLED显示屏		C07A
+OLED_RST              PB14
+OLED_DC               PB15
+OLED_SCL              PA28
+OLED_SDA              PA31
+
+BLS按键			PA18
+
+
+注：该例程主要搭配我司售卖的K210例程（色块识别跟随，数字识别等）进行使用，OLED显示屏会显示K210对应例程识别到的内容

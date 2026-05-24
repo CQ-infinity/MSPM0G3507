@@ -1,0 +1,21 @@
+该例程主要搭配我司的C07A+D36A驱动+MS42C步进电机使用
+D36A		MSPM0G3507
+ST1------------PB2 (GPIOB.2, IOMUX_PINCM15, TIMA1_CCP0)
+ST2------------PB3 (GPIOB.3, IOMUX_PINCM16, TIMG6_CCP1)
+DIR1------------PA13 (GPIOA.13, IOMUX_PINCM35)
+DIR2------------PA14 (GPIOA.14, IOMUX_PINCM36)
+EN1------------PA16 (GPIOA.16, IOMUX_PINCM38)
+EN2------------PA17 (GPIOA.17, IOMUX_PINCM39)
+GND------------GND（！！！注意！！！：两个板子可单独供电但是需要共地）
+
+
+速度控制例程使用方法，单击BLS按键可开启或关闭电机
+修改程序中Calculate_target设置的值（单位RPM）可改变电机的转速以及方向（大于0时顺时针方向旋转，小于0时逆时针方向旋转。）
+L_PWM=Calculate_target(60);//设置电机每分钟60转
+R_PWM=Calculate_target(60);//设置电机每分钟60转
+
+
+角度控制例程使用方法,单击BLS按键转到45°角，修改转动角度需到KEY.C文件下的key（）中修改
+L_PWM=Calculate_MA_Angle_PWM(ATarget_angle);
+R_PWM=Calculate_MB_Angle_PWM(BTarget_angle);
+由于是开环控制，角度转动精度有限。

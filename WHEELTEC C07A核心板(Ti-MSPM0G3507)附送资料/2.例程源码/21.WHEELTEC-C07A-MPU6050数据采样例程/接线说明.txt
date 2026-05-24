@@ -1,0 +1,13 @@
+MPU6050引脚　　　　　　　　MSPM0G3507引脚
+VCC　　　　　　　··········→　　　　3.3V
+GND　　　　　　　··········→　　　　GND
+SCL　　　　　　　··········→　　　　 PA1 (I2C0_SCL)
+SDA　　　　　　　··········→　　　　PA0 (I2C0_SDA)
+INT				··········→			PA7	
+
+其他外设接线
+LED引脚　　　　　　　　　　MSPM0G3507引脚
+LED　　　　　　　··········→　　　　PB.9
+串口引脚　　　　　　　　　　MSPM0G3507引脚
+TX　　　　　　　 ··········→　　　　PA.10 (UART0_TX)
+RX　　　　　　　 ··········→　　　　PA.11 (UART0_RX)

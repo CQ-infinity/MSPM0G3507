@@ -1,0 +1,7 @@
+1、需要购买我们店铺的蓝牙模块，连接上蓝牙APP进行遥控
+
+我们的蓝牙遥控APP名称叫WHEELTEC，在华为、小米、OPPO、vivo、苹果的应用商城中皆可搜索下载安装
+安卓用户还可以下载对应安装包文件自行安装，安卓安装包百度网盘链接: 
+https://pan.baidu.com/s/1RksjMsXt_Fa8YTasnyf-jg
+
+2、小车开机后要按下BLS使能才能遥控
